@@ -2,12 +2,17 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as iam from 'aws-cdk-lib/aws-iam';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    console.log('props', props);
+    console.log('process.env.AWS_ACCESS_KEY', process.env.AWS_ACCESS_KEY);
+    console.log('process.env.AWS_SECRET_KEY', process.env.AWS_SECRET_KEY);
+
+    const keyName = 'prometheus-key';
 
     // Create a VPC
     const vpc = new ec2.Vpc(this, 'MyVpc', {
@@ -21,6 +26,7 @@ export class InfraStack extends cdk.Stack {
       allowAllOutbound: true
     });
     securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'allow ssh access from the world');
+    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9090), 'allow prometheus ui');
 
     // Define user data script
     const userData = ec2.UserData.forLinux();
@@ -35,9 +41,10 @@ export class InfraStack extends cdk.Stack {
     new ec2.Instance(this, 'MyInstance', {
       vpc,
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
-      machineImage: ec2.MachineImage.latestAmazonLinux(),
+      machineImage: new ec2.AmazonLinuxImage(),
       securityGroup,
-      userData
+      userData,
+      keyName,
     });
 
     // The code that defines your stack goes here

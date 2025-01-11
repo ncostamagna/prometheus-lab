@@ -11,3 +11,6 @@ aws ec2 start-instances --profile costamagna-terraform --region us-east-1 --inst
 aws ec2 stop-instances --profile costamagna-terraform --region us-east-1 --instance-ids {instance-id}
 
 ```
+
+# Doc
+notion page: https://www.notion.so/Prometheus-17630008732a80939106c2eded1cae01

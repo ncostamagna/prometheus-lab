@@ -6,6 +6,7 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/ncostamagna/go-http-utils/response"
 	"github.com/ncostamagna/prometheus-lab/app/internal/product"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"context"
 	"net/http"
 	"encoding/json"
@@ -18,6 +19,14 @@ const (
 	ctxHeader ctxKey = "header"
 )
 
+func prometheusHandler() gin.HandlerFunc {
+    h := promhttp.Handler()
+
+    return func(c *gin.Context) {
+        h.ServeHTTP(c.Writer, c.Request)
+    }
+}
+
 func NewHTTPServer(_ context.Context, endpoints product.Endpoints) http.Handler {
 
 	r := gin.Default()
@@ -29,6 +38,8 @@ func NewHTTPServer(_ context.Context, endpoints product.Endpoints) http.Handler 
 
 	r.GET("/products", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.Get), decodeGetHandler, encodeResponse, opts...)))
 	r.POST("/products", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.Store), decodeStoreHandler, encodeResponse, opts...)))
+
+	r.GET("/metrics", prometheusHandler())
 
 	return r
 }

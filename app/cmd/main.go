@@ -27,16 +27,7 @@ func main() {
         }
     }()
 
-	//logger := bootstrap.NewLogger()
-
 	_ = godotenv.Load()
-
-	//logger.Info("DataBases")
-	//db, err := bootstrap.DBConnection()
-	//if err != nil {
-	//	logger.Error(err)
-	//	os.Exit(-1)
-	//}
 
 	flag.Parse()
 	ctx := context.Background()
@@ -68,10 +59,7 @@ func main() {
 			service)
 	}
 
-	pagLimDef := os.Getenv("PAGINATOR_LIMIT_DEFAULT")
-	if pagLimDef == "" {
-		os.Exit(-1)
-	}
+	pagLimDef := "30"
 
 	h := handler.NewHTTPServer(ctx, product.MakeEndpoints(service, product.Config{LimPageDef: pagLimDef}))
 

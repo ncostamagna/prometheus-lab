@@ -30,7 +30,7 @@ type (
 	}
 
 	GetReq struct {
-		ID string `json:"productId"`
+		ID int `json:"productId"`
 	}
 
 	GetAllReq struct {
@@ -44,7 +44,7 @@ type (
 	}
 
 	DeleteReq struct {
-		ID string
+		ID int
 	}
 
 	Config struct {

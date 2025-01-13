@@ -19,14 +19,6 @@ const (
 	ctxHeader ctxKey = "header"
 )
 
-func prometheusHandler() gin.HandlerFunc {
-    h := promhttp.Handler()
-
-    return func(c *gin.Context) {
-        h.ServeHTTP(c.Writer, c.Request)
-    }
-}
-
 func NewHTTPServer(_ context.Context, endpoints product.Endpoints) http.Handler {
 
 	r := gin.Default()
@@ -36,10 +28,14 @@ func NewHTTPServer(_ context.Context, endpoints product.Endpoints) http.Handler 
 	}
 	r.Use(ginDecode())
 
-	r.GET("/products", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.Get), decodeGetHandler, encodeResponse, opts...)))
+	r.GET("/products", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.GetAll), decodeGetAllHandler, encodeResponse, opts...)))
 	r.POST("/products", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.Store), decodeStoreHandler, encodeResponse, opts...)))
 
-	r.GET("/metrics", prometheusHandler())
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	return r
 }
@@ -54,11 +50,11 @@ func ginDecode() gin.HandlerFunc {
 }
 
 func decodeGetHandler(ctx context.Context, r *http.Request) (interface{}, error) {
-	pp := ctx.Value(ctxHeader).(http.Header)
+	//pp := ctx.Value(ctxHeader).(http.Header)
 
-	if len(pp["Authorization"]) < 1 {
-		return nil, response.BadRequest("invalid authentication")
-	}
+	//if len(pp["Authorization"]) < 1 {
+	//	return nil, response.BadRequest("invalid authentication")
+	//}
 
 	req := product.GetReq{}
 
@@ -67,7 +63,9 @@ func decodeGetHandler(ctx context.Context, r *http.Request) (interface{}, error)
 
 func decodeGetAllHandler(_ context.Context,  r *http.Request) (interface{}, error) {
 
-	return nil, nil
+	var req product.GetAllReq
+
+	return req, nil
 }
 
 func decodeStoreHandler(ctx context.Context, r *http.Request) (interface{}, error) {

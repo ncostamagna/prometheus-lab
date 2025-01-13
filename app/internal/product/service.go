@@ -3,7 +3,7 @@ package product
 import (
 	"context"
 	"log"
-
+	"time"
 	"github.com/ncostamagna/prometheus-lab/app/internal/domain"
 )
 
@@ -14,9 +14,9 @@ type (
 
 	Service interface {
 		Store(ctx context.Context, name, description string, price float64) (*domain.Product, error)
-		Get(ctx context.Context, id string) (*domain.Product, error)
+		Get(ctx context.Context, id int) (*domain.Product, error)
 		GetAll(ctx context.Context, filters Filters, offset, limit int) ([]domain.Product, error)
-		Delete(ctx context.Context, id string) error
+		Delete(ctx context.Context, id int) error
 		Update(ctx context.Context, id string, name, description *string, price *float64) error
 		Count(ctx context.Context, filters Filters) (int, error)
 	}
@@ -50,15 +50,16 @@ func (s service) Store(ctx context.Context, name, description string, price floa
 	return product, nil
 }
 
-func (s service) GetAll(ctx context.Context, filters Filters, offset, limit int) ([]domain.Product, error) {
-	products, err := s.repo.GetAll(ctx, filters, offset, limit)
+func (s service) GetAll(ctx context.Context, _ Filters, offset, limit int) ([]domain.Product, error) {
+	products, err := s.repo.GetAll(ctx, offset, limit)
 	if err != nil {
 		return nil, err
 	}
+	time.Sleep(time.Second * 1)
 	return products, nil
 }
 
-func (s service) Get(ctx context.Context, id string) (*domain.Product, error) {
+func (s service) Get(ctx context.Context, id int) (*domain.Product, error) {
 	product, err := s.repo.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -66,7 +67,7 @@ func (s service) Get(ctx context.Context, id string) (*domain.Product, error) {
 	return product, nil
 }
 
-func (s service) Delete(ctx context.Context, id string) error {
+func (s service) Delete(ctx context.Context, id int) error {
 
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return err
@@ -82,6 +83,6 @@ func (s service) Update(ctx context.Context, id string, name, description *strin
 	return nil
 }
 
-func (s service) Count(ctx context.Context, filters Filters) (int, error) {
-	return s.repo.Count(ctx, filters)
+func (s service) Count(ctx context.Context, _ Filters) (int, error) {
+	return s.repo.Count(ctx)
 }

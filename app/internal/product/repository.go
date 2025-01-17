@@ -1,13 +1,12 @@
 package product
 
 import (
-	"context"
-	"fmt"
-	"log"
 	"cmp"
-	"slices"
+	"context"
 	"github.com/ncostamagna/prometheus-lab/app/internal/domain"
 	"gorm.io/gorm"
+	"log"
+	"slices"
 )
 
 var products []domain.Product
@@ -54,11 +53,13 @@ func (r *repo) GetAll(ctx context.Context, offset, limit int) ([]domain.Product,
 
 func (r *repo) Get(ctx context.Context, id int) (*domain.Product, error) {
 
-	i, _ := slices.BinarySearchFunc(products, id, func(a domain.Product, b int) int {
+	i, found := slices.BinarySearchFunc(products, id, func(a domain.Product, b int) int {
 		return cmp.Compare(a.ID, b)
 	})
 
-	fmt.Println(products[i])
+	if !found {
+		return nil, ErrNotFound{id}
+	}
 
 	return &products[i], nil
 }

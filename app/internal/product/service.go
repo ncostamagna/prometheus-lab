@@ -2,9 +2,9 @@ package product
 
 import (
 	"context"
+	"github.com/ncostamagna/prometheus-lab/app/internal/domain"
 	"log"
 	"time"
-	"github.com/ncostamagna/prometheus-lab/app/internal/domain"
 )
 
 type (

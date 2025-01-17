@@ -65,8 +65,11 @@ func MakeEndpoints(s Service, c Config) Endpoints {
 func makeGet(service Service) Controller {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetReq)
-		log.Println("Entra Get")
-		log.Println(req)
+
+		if req.ID == 0 {
+			return nil, response.BadRequest("ID must be greater than 0")
+		}
+
 		product, err := service.Get(ctx, req.ID)
 		if err != nil {
 			if errors.As(err, &ErrNotFound{}) {

@@ -1,15 +1,17 @@
 package handler
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
-		"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/endpoint"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/ncostamagna/go-http-utils/response"
 	"github.com/ncostamagna/prometheus-lab/app/internal/product"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"context"
 	"net/http"
-	"encoding/json"
+	"strconv"
 )
 
 type ctxKey string
@@ -31,6 +33,10 @@ func NewHTTPServer(_ context.Context, endpoints product.Endpoints) http.Handler 
 	r.GET("/products", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.GetAll), decodeGetAllHandler, encodeResponse, opts...)))
 	r.POST("/products", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.Store), decodeStoreHandler, encodeResponse, opts...)))
 
+	r.GET("/products/:id", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.Get), decodeGetHandler, encodeResponse, opts...)))
+	r.PATCH("/products/:id", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.Update), decodeUpdateHandler, encodeResponse, opts...)))
+	r.DELETE("/products/:id", gin.WrapH(httptransport.NewServer(endpoint.Endpoint(endpoints.Delete), decodeDeleteHandler, encodeResponse, opts...)))
+
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	r.GET("/health", func(c *gin.Context) {
@@ -50,18 +56,20 @@ func ginDecode() gin.HandlerFunc {
 }
 
 func decodeGetHandler(ctx context.Context, r *http.Request) (interface{}, error) {
-	//pp := ctx.Value(ctxHeader).(http.Header)
+	params := ctx.Value(ctxParam).(gin.Params)
+	fmt.Println(params)
 
-	//if len(pp["Authorization"]) < 1 {
-	//	return nil, response.BadRequest("invalid authentication")
-	//}
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		return nil, response.BadRequest(err.Error())
+	}
 
-	req := product.GetReq{}
-
-	return req, nil
+	return product.GetReq{
+		ID: id,
+	}, nil
 }
 
-func decodeGetAllHandler(_ context.Context,  r *http.Request) (interface{}, error) {
+func decodeGetAllHandler(_ context.Context, r *http.Request) (interface{}, error) {
 
 	var req product.GetAllReq
 
@@ -71,7 +79,7 @@ func decodeGetAllHandler(_ context.Context,  r *http.Request) (interface{}, erro
 func decodeStoreHandler(ctx context.Context, r *http.Request) (interface{}, error) {
 	var req product.StoreReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, err
+		return nil, response.BadRequest(err.Error())
 	}
 
 	return req, nil

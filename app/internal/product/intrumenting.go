@@ -10,10 +10,10 @@ import (
 
 type (
 	instrumenting struct {
-		requestCount   metrics.Counter
-		requestLatency metrics.Histogram
+		requestCount          metrics.Counter
+		requestLatency        metrics.Histogram
 		requestLatencySummary metrics.Histogram
-		s              Service
+		s                     Service
 	}
 
 	Instrumenting interface {
@@ -23,10 +23,10 @@ type (
 
 func NewInstrumenting(requestCount metrics.Counter, requestLatencySummary metrics.Histogram, requestLatency metrics.Histogram, s Service) Service {
 	return &instrumenting{
-		requestCount:   requestCount,
+		requestCount:          requestCount,
 		requestLatencySummary: requestLatencySummary,
-		requestLatency: requestLatency,
-		s:              s,
+		requestLatency:        requestLatency,
+		s:                     s,
 	}
 }
 
@@ -89,4 +89,3 @@ func (i *instrumenting) Count(ctx context.Context, filters Filters) (int, error)
 
 	return i.s.Count(ctx, filters)
 }
-

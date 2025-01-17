@@ -3,13 +3,13 @@ package main
 import (
 	"time"
 
+	"context"
+	"flag"
+	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/joho/godotenv"
 	"github.com/ncostamagna/prometheus-lab/app/internal/product"
 	"github.com/ncostamagna/prometheus-lab/app/pkg/handler"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
-	"context"
-	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -22,10 +22,10 @@ const defaultURL = "0.0.0.0:80"
 func main() {
 
 	defer func() {
-        if r := recover(); r != nil {
-            log.Printf("Application panicked: %v", r)
-        }
-    }()
+		if r := recover(); r != nil {
+			log.Printf("Application panicked: %v", r)
+		}
+	}()
 
 	_ = godotenv.Load()
 

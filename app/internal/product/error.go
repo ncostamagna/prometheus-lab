@@ -8,9 +8,9 @@ import (
 var ErrNameRequired = errors.New("name is required")
 
 type ErrNotFound struct {
-	ProductID string
+	ProductID int
 }
 
 func (e ErrNotFound) Error() string {
-	return fmt.Sprintf("product '%s' doesn't exist", e.ProductID)
+	return fmt.Sprintf("product '%d' doesn't exist", e.ProductID)
 }

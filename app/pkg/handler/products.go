@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/ncostamagna/go-http-utils/response"
 	"github.com/ncostamagna/prometheus-lab/app/internal/product"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
-	"strconv"
 )
 
 type ctxKey string

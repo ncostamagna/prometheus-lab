@@ -5,14 +5,15 @@ import (
 
 	"context"
 	"flag"
+	"log"
+	"net/http"
+	"os"
+
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/joho/godotenv"
 	"github.com/ncostamagna/prometheus-lab/app/internal/product"
 	"github.com/ncostamagna/prometheus-lab/app/pkg/handler"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	"log"
-	"net/http"
-	"os"
 )
 
 const writeTimeout = 10 * time.Second
@@ -35,7 +36,7 @@ func main() {
 	fieldKeys := []string{"method"}
 	var service product.Service
 	{
-		repository := product.NewRepo(nil, nil)
+		repository := product.NewRepo(nil)
 		service = product.NewService(nil, repository)
 		service = product.NewInstrumenting(
 			kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{

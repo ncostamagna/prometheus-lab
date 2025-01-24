@@ -3,18 +3,11 @@ package product
 import (
 	"cmp"
 	"context"
-	"github.com/ncostamagna/prometheus-lab/app/internal/domain"
-	"gorm.io/gorm"
 	"log"
 	"slices"
+
+	"github.com/ncostamagna/prometheus-lab/app/internal/domain"
 )
-
-var products []domain.Product
-var maxId int
-
-func init() {
-	products = []domain.Product{}
-}
 
 type (
 	Repository interface {
@@ -26,34 +19,41 @@ type (
 		Count(ctx context.Context) (int, error)
 	}
 
+	db struct {
+		products []domain.Product
+		maxId    int
+	}
 	repo struct {
-		db  *gorm.DB
+		db  db
 		log *log.Logger
 	}
 )
 
 // NewRepo is a repositories handler
-func NewRepo(db *gorm.DB, l *log.Logger) Repository {
+func NewRepo(l *log.Logger) Repository {
 	return &repo{
-		db:  db,
+		db: db{
+			products: []domain.Product{},
+			maxId:    0,
+		},
 		log: l,
 	}
 }
 
 func (r *repo) Store(ctx context.Context, product *domain.Product) error {
-	maxId++
-	product.ID = maxId
-	products = append(products, *product)
+	r.db.maxId++
+	product.ID = r.db.maxId
+	r.db.products = append(r.db.products, *product)
 	return nil
 }
 
 func (r *repo) GetAll(ctx context.Context, offset, limit int) ([]domain.Product, error) {
-	return products, nil
+	return r.db.products, nil
 }
 
 func (r *repo) Get(ctx context.Context, id int) (*domain.Product, error) {
 
-	i, found := slices.BinarySearchFunc(products, id, func(a domain.Product, b int) int {
+	i, found := slices.BinarySearchFunc(r.db.products, id, func(a domain.Product, b int) int {
 		return cmp.Compare(a.ID, b)
 	})
 
@@ -61,11 +61,11 @@ func (r *repo) Get(ctx context.Context, id int) (*domain.Product, error) {
 		return nil, ErrNotFound{id}
 	}
 
-	return &products[i], nil
+	return &r.db.products[i], nil
 }
 
 func (r *repo) Delete(ctx context.Context, id int) error {
-	slices.DeleteFunc(products, func(a domain.Product) bool {
+	r.db.products = slices.DeleteFunc(r.db.products, func(a domain.Product) bool {
 		return a.ID == id
 	})
 	return nil
@@ -102,5 +102,5 @@ func (r *repo) Update(ctx context.Context, id string, name, description *string,
 }
 
 func (r *repo) Count(ctx context.Context) (int, error) {
-	return maxId, nil
+	return r.db.maxId, nil
 }

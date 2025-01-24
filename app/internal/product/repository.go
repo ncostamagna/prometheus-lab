@@ -21,7 +21,7 @@ type (
 
 	db struct {
 		products []domain.Product
-		maxId    int
+		maxID    int
 	}
 	repo struct {
 		db  db
@@ -29,29 +29,29 @@ type (
 	}
 )
 
-// NewRepo is a repositories handler
+// NewRepo is a repositories handler.
 func NewRepo(l *log.Logger) Repository {
 	return &repo{
 		db: db{
 			products: []domain.Product{},
-			maxId:    0,
+			maxID:    0,
 		},
 		log: l,
 	}
 }
 
-func (r *repo) Store(ctx context.Context, product *domain.Product) error {
-	r.db.maxId++
-	product.ID = r.db.maxId
+func (r *repo) Store(_ context.Context, product *domain.Product) error {
+	r.db.maxID++
+	product.ID = r.db.maxID
 	r.db.products = append(r.db.products, *product)
 	return nil
 }
 
-func (r *repo) GetAll(ctx context.Context, offset, limit int) ([]domain.Product, error) {
+func (r *repo) GetAll(_ context.Context, _, _ int) ([]domain.Product, error) {
 	return r.db.products, nil
 }
 
-func (r *repo) Get(ctx context.Context, id int) (*domain.Product, error) {
+func (r *repo) Get(_ context.Context, id int) (*domain.Product, error) {
 
 	i, found := slices.BinarySearchFunc(r.db.products, id, func(a domain.Product, b int) int {
 		return cmp.Compare(a.ID, b)
@@ -64,14 +64,14 @@ func (r *repo) Get(ctx context.Context, id int) (*domain.Product, error) {
 	return &r.db.products[i], nil
 }
 
-func (r *repo) Delete(ctx context.Context, id int) error {
+func (r *repo) Delete(_ context.Context, id int) error {
 	r.db.products = slices.DeleteFunc(r.db.products, func(a domain.Product) bool {
 		return a.ID == id
 	})
 	return nil
 }
 
-func (r *repo) Update(ctx context.Context, id string, name, description *string, price *float64) error {
+func (r *repo) Update(_ context.Context, _ string, _, _ *string, _ *float64) error {
 
 	/*values := make(map[string]interface{})
 
@@ -101,6 +101,6 @@ func (r *repo) Update(ctx context.Context, id string, name, description *string,
 	return nil
 }
 
-func (r *repo) Count(ctx context.Context) (int, error) {
-	return r.db.maxId, nil
+func (r *repo) Count(_ context.Context) (int, error) {
+	return r.db.maxID, nil
 }

@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -56,9 +55,8 @@ func ginDecode() gin.HandlerFunc {
 	}
 }
 
-func decodeGetHandler(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeGetHandler(ctx context.Context, _ *http.Request) (interface{}, error) {
 	params := ctx.Value(ctxParam).(gin.Params)
-	fmt.Println(params)
 
 	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
@@ -70,14 +68,14 @@ func decodeGetHandler(ctx context.Context, r *http.Request) (interface{}, error)
 	}, nil
 }
 
-func decodeGetAllHandler(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeGetAllHandler(_ context.Context, _ *http.Request) (interface{}, error) {
 
 	var req product.GetAllReq
 
 	return req, nil
 }
 
-func decodeStoreHandler(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeStoreHandler(_ context.Context, r *http.Request) (interface{}, error) {
 	var req product.StoreReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return nil, response.BadRequest(err.Error())
@@ -86,21 +84,21 @@ func decodeStoreHandler(ctx context.Context, r *http.Request) (interface{}, erro
 	return req, nil
 }
 
-func decodeUpdateHandler(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeUpdateHandler(_ context.Context, _ *http.Request) (interface{}, error) {
 
 	var req product.UpdateReq
 
 	return req, nil
 }
 
-func decodeDeleteHandler(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeDeleteHandler(_ context.Context, _ *http.Request) (interface{}, error) {
 
 	var req product.DeleteReq
 
 	return req, nil
 }
 
-func encodeResponse(ctx context.Context, w http.ResponseWriter, resp interface{}) error {
+func encodeResponse(_ context.Context, w http.ResponseWriter, resp interface{}) error {
 	r := resp.(response.Response)
 	w.WriteHeader(http.StatusOK)
 	return json.NewEncoder(w).Encode(r)

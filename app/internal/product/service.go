@@ -28,7 +28,7 @@ type (
 	}
 )
 
-// NewService is a service handler
+// NewService is a service handler.
 func NewService(l *log.Logger, repo Repository) Service {
 	return &service{
 		log:  l,

@@ -2,8 +2,6 @@ package product
 
 import (
 	"context"
-	"fmt"
-
 	"errors"
 	"log"
 
@@ -14,7 +12,7 @@ import (
 type (
 	Controller func(ctx context.Context, request interface{}) (interface{}, error)
 
-	// Endpoints struct
+	// Endpoints struct.
 	Endpoints struct {
 		Get    Controller
 		GetAll Controller
@@ -84,14 +82,12 @@ func makeGet(service Service) Controller {
 func makeGetAll(service Service, c Config) Controller {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetAllReq)
-		fmt.Println(req)
 		filters := Filters{
 			Name: req.Name,
 		}
 
 		count, err := service.Count(ctx, filters)
 		if err != nil {
-			fmt.Println(err)
 			return nil, response.InternalServerError(err.Error())
 		}
 
@@ -129,15 +125,19 @@ func makeStore(service Service) Controller {
 	}
 }
 
-func makeUpdate(service Service) Controller {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
+func makeUpdate(_ Service) Controller {
+	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		return response.OK("Success", "UPDATE: testing 1234 6789", nil), nil
 	}
 }
 
 func makeDelete(service Service) Controller {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(DeleteReq)
+		if err := service.Delete(ctx, req.ID); err != nil {
+			return nil, response.InternalServerError(err.Error())
+		}
 		log.Println("Entra Delete")
-		return response.OK("Success", "DELETE: testing 1234 6789", nil), nil
+		return response.OK("Success", "", nil), nil
 	}
 }

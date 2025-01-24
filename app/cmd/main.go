@@ -3,17 +3,17 @@ package main
 import (
 	"time"
 
+	"github.com/ncostamagna/prometheus-lab/app/pkg/instance"
+
 	"context"
 	"flag"
 	"log"
 	"net/http"
 	"os"
 
-	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/joho/godotenv"
 	"github.com/ncostamagna/prometheus-lab/app/internal/product"
 	"github.com/ncostamagna/prometheus-lab/app/pkg/handler"
-	stdprometheus "github.com/prometheus/client_golang/prometheus"
 )
 
 const writeTimeout = 10 * time.Second
@@ -33,36 +33,11 @@ func main() {
 	flag.Parse()
 	ctx := context.Background()
 
-	fieldKeys := []string{"method"}
-	var service product.Service
-	{
-		repository := product.NewRepo(nil)
-		service = product.NewService(nil, repository)
-		service = product.NewInstrumenting(
-			kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
-				Namespace: "api",
-				Subsystem: "product_service",
-				Name:      "request_count",
-				Help:      "Number of requests received.",
-			}, fieldKeys),
-			kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
-				Namespace: "api",
-				Subsystem: "product_service",
-				Name:      "request_latency_microseconds_summary",
-				Help:      "Total duration of requests in microseconds.",
-			}, fieldKeys),
-			kitprometheus.NewHistogramFrom(stdprometheus.HistogramOpts{
-				Namespace: "api",
-				Subsystem: "product_service",
-				Name:      "request_latency_microseconds",
-				Help:      "Total duration of requests in microseconds.",
-			}, fieldKeys),
-			service)
-	}
+	productSrv := instance.NewProductService()
 
 	pagLimDef := "30"
 
-	h := handler.NewHTTPServer(ctx, product.MakeEndpoints(service, product.Config{LimPageDef: pagLimDef}))
+	h := handler.NewHTTPServer(ctx, product.MakeEndpoints(productSrv, product.Config{LimPageDef: pagLimDef}))
 
 	url := os.Getenv("APP_URL")
 	if url == "" {

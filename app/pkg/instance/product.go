@@ -2,17 +2,18 @@ package instance
 
 import (
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
+	"github.com/ncostamagna/go-logger-hub/loghub"
 	"github.com/ncostamagna/prometheus-lab/app/internal/product"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 )
 
 const METHOD = "method"
 
-func NewProductService() product.Service {
+func NewProductService(logger loghub.Logger) product.Service {
 
 	fieldKeys := []string{METHOD}
-	repository := product.NewRepo(nil)
-	service := product.NewService(nil, repository)
+	repository := product.NewRepo(logger)
+	service := product.NewService(logger, repository)
 	return product.NewInstrumenting(
 		kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 			Namespace: "api",

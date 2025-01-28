@@ -70,7 +70,7 @@ func (i *instrumenting) Delete(ctx context.Context, id int) error {
 	return i.s.Delete(ctx, id)
 }
 
-func (i *instrumenting) Update(ctx context.Context, id string, name, description *string, price *float64) error {
+func (i *instrumenting) Update(ctx context.Context, id int, name, description *string, price *float64) error {
 	defer func(begin time.Time) {
 		i.requestCount.With("method", "Update").Add(1)
 		i.requestLatencySummary.With("method", "Update").Observe(time.Since(begin).Seconds())

@@ -1,13 +1,15 @@
 package main
 
 import (
+	"log"
 	"time"
+
+	"github.com/ncostamagna/prometheus-lab/app/pkg/bootstrap"
 
 	"github.com/ncostamagna/prometheus-lab/app/pkg/instance"
 
 	"context"
 	"flag"
-	"log"
 	"net/http"
 	"os"
 
@@ -33,7 +35,8 @@ func main() {
 	flag.Parse()
 	ctx := context.Background()
 
-	productSrv := instance.NewProductService()
+	logger := bootstrap.NewLogger()
+	productSrv := instance.NewProductService(logger)
 
 	pagLimDef := "30"
 

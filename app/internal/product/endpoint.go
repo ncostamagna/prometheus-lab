@@ -3,7 +3,6 @@ package product
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/ncostamagna/go-http-utils/meta"
 	"github.com/ncostamagna/go-http-utils/response"
@@ -38,7 +37,10 @@ type (
 	}
 
 	UpdateReq struct {
-		ID string
+		ID          int
+		Name        *string  `json:"name"`
+		Description *string  `json:"description"`
+		Price       *float64 `json:"price"`
 	}
 
 	DeleteReq struct {
@@ -125,8 +127,14 @@ func makeStore(service Service) Controller {
 	}
 }
 
-func makeUpdate(_ Service) Controller {
-	return func(_ context.Context, _ interface{}) (interface{}, error) {
+func makeUpdate(service Service) Controller {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(UpdateReq)
+
+		if err := service.Update(ctx, req.ID, req.Name, req.Description, req.Price); err != nil {
+			return nil, response.InternalServerError(err.Error())
+		}
+
 		return response.OK("Success", "UPDATE: testing 1234 6789", nil), nil
 	}
 }
@@ -137,7 +145,6 @@ func makeDelete(service Service) Controller {
 		if err := service.Delete(ctx, req.ID); err != nil {
 			return nil, response.InternalServerError(err.Error())
 		}
-		log.Println("Entra Delete")
 		return response.OK("Success", "", nil), nil
 	}
 }

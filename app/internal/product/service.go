@@ -2,8 +2,8 @@ package product
 
 import (
 	"context"
-	"log"
-	"time"
+
+	"github.com/ncostamagna/go-logger-hub/loghub"
 
 	"github.com/ncostamagna/prometheus-lab/app/internal/domain"
 )
@@ -18,18 +18,18 @@ type (
 		Get(ctx context.Context, id int) (*domain.Product, error)
 		GetAll(ctx context.Context, filters Filters, offset, limit int) ([]domain.Product, error)
 		Delete(ctx context.Context, id int) error
-		Update(ctx context.Context, id string, name, description *string, price *float64) error
+		Update(ctx context.Context, id int, name, description *string, price *float64) error
 		Count(ctx context.Context, filters Filters) (int, error)
 	}
 
 	service struct {
-		log  *log.Logger
+		log  loghub.Logger
 		repo Repository
 	}
 )
 
 // NewService is a service handler.
-func NewService(l *log.Logger, repo Repository) Service {
+func NewService(l loghub.Logger, repo Repository) Service {
 	return &service{
 		log:  l,
 		repo: repo,
@@ -56,7 +56,6 @@ func (s service) GetAll(ctx context.Context, _ Filters, offset, limit int) ([]do
 	if err != nil {
 		return nil, err
 	}
-	time.Sleep(time.Second * 1)
 	return products, nil
 }
 
@@ -77,7 +76,7 @@ func (s service) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func (s service) Update(ctx context.Context, id string, name, description *string, price *float64) error {
+func (s service) Update(ctx context.Context, id int, name, description *string, price *float64) error {
 	if err := s.repo.Update(ctx, id, name, description, price); err != nil {
 		return err
 	}

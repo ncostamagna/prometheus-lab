@@ -3,8 +3,9 @@ package product
 import (
 	"cmp"
 	"context"
-	"log"
 	"slices"
+
+	"github.com/ncostamagna/go-logger-hub/loghub"
 
 	"github.com/ncostamagna/prometheus-lab/app/internal/domain"
 )
@@ -15,7 +16,7 @@ type (
 		GetAll(ctx context.Context, offset, limit int) ([]domain.Product, error)
 		Get(ctx context.Context, id int) (*domain.Product, error)
 		Delete(ctx context.Context, id int) error
-		Update(ctx context.Context, id string, name, description *string, price *float64) error
+		Update(ctx context.Context, id int, name, description *string, price *float64) error
 		Count(ctx context.Context) (int, error)
 	}
 
@@ -25,12 +26,12 @@ type (
 	}
 	repo struct {
 		db  db
-		log *log.Logger
+		log loghub.Logger
 	}
 )
 
 // NewRepo is a repositories handler.
-func NewRepo(l *log.Logger) Repository {
+func NewRepo(l loghub.Logger) Repository {
 	return &repo{
 		db: db{
 			products: []domain.Product{},
@@ -71,32 +72,23 @@ func (r *repo) Delete(_ context.Context, id int) error {
 	return nil
 }
 
-func (r *repo) Update(_ context.Context, _ string, _, _ *string, _ *float64) error {
-
-	/*values := make(map[string]interface{})
+func (r *repo) Update(ctx context.Context, id int, name, description *string, price *float64) error {
+	p, err := r.Get(ctx, id)
+	if err != nil {
+		return err
+	}
 
 	if name != nil {
-		values["name"] = *name
+		p.Name = *name
 	}
 
-	if startDate != nil {
-		values["start_date"] = *startDate
+	if description != nil {
+		p.Description = *description
 	}
 
-	if endDate != nil {
-		values["end_date"] = *endDate
+	if price != nil {
+		p.Price = *price
 	}
-
-	result := r.db.WithContext(ctx).Model(&domain.Course{}).Where("id = ?", id).Updates(values)
-	if result.Error != nil {
-		r.log.Println(result.Error)
-		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		r.log.Printf("course %s doesn't exists", id)
-		return ErrNotFound{id}
-	}*/
 
 	return nil
 }

@@ -9,5 +9,6 @@ clean:
 start:
 	go run cmd/main.go
 
-test:
+testing:
+	go test -v ./...
 	${GOPATH}/bin/golangci-lint run

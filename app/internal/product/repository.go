@@ -1,8 +1,8 @@
 package product
 
 import (
-	"cmp"
 	"context"
+	"maps"
 	"slices"
 
 	"github.com/ncostamagna/go-logger-hub/loghub"
@@ -21,7 +21,7 @@ type (
 	}
 
 	db struct {
-		products []domain.Product
+		products map[int]domain.Product
 		maxID    int
 	}
 	repo struct {
@@ -34,7 +34,7 @@ type (
 func NewRepo(l loghub.Logger) Repository {
 	return &repo{
 		db: db{
-			products: []domain.Product{},
+			products: make(map[int]domain.Product),
 			maxID:    0,
 		},
 		log: l,
@@ -44,31 +44,26 @@ func NewRepo(l loghub.Logger) Repository {
 func (r *repo) Store(_ context.Context, product *domain.Product) error {
 	r.db.maxID++
 	product.ID = r.db.maxID
-	r.db.products = append(r.db.products, *product)
+	r.db.products[r.db.maxID] = *product
 	return nil
 }
 
 func (r *repo) GetAll(_ context.Context, _, _ int) ([]domain.Product, error) {
-	return r.db.products, nil
+	return slices.Collect(maps.Values(r.db.products)), nil
 }
 
 func (r *repo) Get(_ context.Context, id int) (*domain.Product, error) {
 
-	i, found := slices.BinarySearchFunc(r.db.products, id, func(a domain.Product, b int) int {
-		return cmp.Compare(a.ID, b)
-	})
-
-	if !found {
+	prod, ok := r.db.products[id]
+	if !ok {
 		return nil, ErrNotFound{id}
 	}
 
-	return &r.db.products[i], nil
+	return &prod, nil
 }
 
 func (r *repo) Delete(_ context.Context, id int) error {
-	r.db.products = slices.DeleteFunc(r.db.products, func(a domain.Product) bool {
-		return a.ID == id
-	})
+	delete(r.db.products, id)
 	return nil
 }
 

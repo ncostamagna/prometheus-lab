@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func NewInstrumenting(requestCount metrics.Counter, requestLatencySummary metrics.Histogram, requestLatency metrics.Histogram, s Service) Service {
+func NewInstrumenting(requestCount metrics.Counter, requestLatencySummary metrics.Histogram, requestLatency metrics.Histogram, s Service) Instrumenting {
 	return &instrumenting{
 		requestCount:          requestCount,
 		requestLatencySummary: requestLatencySummary,
